@@ -8,8 +8,12 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
       const MethodChannel('pl.ukaszapps/soundpool');
 
   @override
-  Future<int> init(int streamType, int maxStreams, Map<String, dynamic> platformOptions) async => (await _channel.invokeMethod(
-      "initSoundpool", <String, dynamic>{"maxStreams": maxStreams, "streamType": streamType}..addAll(platformOptions)))!;
+  Future<int> init(int streamType, int maxStreams,
+          Map<String, dynamic> platformOptions) async =>
+      (await _channel.invokeMethod(
+          "initSoundpool",
+          <String, dynamic>{"maxStreams": maxStreams, "streamType": streamType}
+            ..addAll(platformOptions)))!;
 
   @override
   Future<int> loadUri(int poolId, String uri, int priority) async =>
@@ -17,7 +21,12 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
           "loadUri", {"poolId": poolId, "uri": uri, "priority": priority}))!;
 
   @override
-  Future<int> loadUint8List(int poolId, Uint8List rawSound, int priority) async =>
+  Future<double> getDuration(int sourceId) async =>
+      (await _channel.invokeMethod("getDuration", {"sourceId": sourceId})) ?? 0;
+
+  @override
+  Future<int> loadUint8List(
+          int poolId, Uint8List rawSound, int priority) async =>
       (await _channel.invokeMethod("load",
           {"poolId": poolId, "rawSound": rawSound, "priority": priority}))!;
 
@@ -72,7 +81,7 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
   @override
   Future<void> dispose(int poolId) => _channel.invokeMethod("dispose", {
         "poolId": poolId,
-      }); 
+      });
 
   @override
   Future<void> release(int poolId) =>

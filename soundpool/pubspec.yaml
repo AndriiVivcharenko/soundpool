@@ -4,17 +4,18 @@ version: 2.3.0
 homepage: https://github.com/ukasz123/soundpool/tree/master/soundpool
 
 environment:
-  sdk: '>=2.14.0 <3.0.0'
-  flutter: '>=2.0.0'
+  sdk: '>=3.0.3 <4.0.0'
+  flutter: '>=3.3.5'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  soundpool_platform_interface: ^2.1.0
+  soundpool_platform_interface:
+    path: ../soundpool_platform_interface
   
-  soundpool_web: ^2.2.0
-  soundpool_macos: ^2.2.0
+  soundpool_web:
+    path: ../soundpool_web
 
 flutter:
   plugin:
@@ -25,6 +26,4 @@ flutter:
       ios:
         pluginClass: SoundpoolPlugin
       web:
-        default_package: soundpool_web 
-      macos:
-        default_package: soundpool_macos
+        default_package: soundpool_web

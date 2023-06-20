@@ -174,6 +174,11 @@ class Soundpool {
     return soundId;
   }
 
+  Future<double> getDuration(int sourceId) async {
+    assert(!_disposed, "Soundpool instance was already disposed");
+    return _platformInstance.getDuration(sourceId);
+  }
+
   /// Plays sound identified by [soundId]
   ///
   /// Returns streamId to further control playback or 0 if playing failed to

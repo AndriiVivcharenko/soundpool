@@ -29,6 +29,8 @@ abstract class SoundpoolPlatform extends PlatformInterface {
     throw UnimplementedError('createSoundpool() has not been implemented');
   }
 
+  Future<double> getDuration(int sourceId);
+
   Future<int> loadUint8List(int poolId, Uint8List rawSound, int priority) {
     throw UnimplementedError('loadUint8List() has not been implemented');
   }
