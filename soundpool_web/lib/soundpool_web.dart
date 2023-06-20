@@ -77,9 +77,15 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   }
 
   @override
-  Future<int> play(int poolId, int soundId, int repeat, double rate) async {
+  Future<int> play(int poolId, int soundId, int repeat, double rate, int offset) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
-    return await wrapper.play(soundId, rate: rate, repeat: repeat);
+    return await wrapper.play(soundId, rate: rate, repeat: repeat, offset: offset);
+  }
+
+  @override
+  Future<bool> resume(int poolId, int streamId) async {
+    _AudioContextWrapper wrapper = _pool[poolId]!;
+    return wrapper.resume(streamId);
   }
 
   @override
@@ -107,7 +113,10 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   }
 
   @override
-  Future<void> pause(int poolId, int streamId) => stop(poolId, streamId);
+  Future<void> pause(int poolId, int streamId) async {
+    _AudioContextWrapper wrapper = _pool[poolId]!;
+    wrapper.pause();
+  }
 }
 
 class _AudioContextWrapper {
@@ -137,7 +146,7 @@ class _AudioContextWrapper {
     return await load(buffer.buffer);
   }
 
-  Future<int> play(int soundId, {double rate = 1.0, int repeat = 0}) async {
+  Future<int> play(int soundId, {double rate = 1.0, int repeat = 0, int offset = 0}) async {
     _CachedAudioSettings cachedAudio = _cache[soundId]!;
     audio.AudioBuffer audioBuffer = cachedAudio.buffer;
     var playbackRate = rate;
@@ -170,7 +179,7 @@ class _AudioContextWrapper {
     // repeat setup: loop sound when repeat is a non-zero value, -1 means infinite loop, positive number means number of extra repeats
     sampleSource.loop = repeat != 0;
 
-    sampleSource.start();
+    sampleSource.start(0, offset);
 
     if (repeat > 0) {
       sampleSource.stop((audioContext.currentTime ?? 0.0) +
@@ -179,10 +188,33 @@ class _AudioContextWrapper {
     return streamId;
   }
 
+  // Future<double> getCurrentTime(int streamid) async {
+  //
+  // }
+
+
+  Future<void> pause() async {
+    if(audioContext.state == "running") {
+      await audioContext.suspend();
+    }
+  }
+
+  Future<bool> resume(int streamId) async {
+    print("player: ${audioContext.state}");
+    if(audioContext.state == "suspended") {
+      await audioContext.resume();
+      return true;
+    } else {
+      play(streamId);
+    }
+
+    return false;
+  }
+
   Future<void> stop(int streamId) async {
     _PlayingAudioWrapper? audioWrapper = _playedAudioCache.remove(streamId);
     audioWrapper?.subscription?.cancel();
-    audioWrapper?.sourceNode?.stop();
+    audioWrapper?.sourceNode.stop();
   }
 
   Future<void> setVolume(

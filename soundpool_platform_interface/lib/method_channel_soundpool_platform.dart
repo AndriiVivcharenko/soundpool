@@ -31,12 +31,13 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
           {"poolId": poolId, "rawSound": rawSound, "priority": priority}))!;
 
   @override
-  Future<int> play(int poolId, int soundId, int repeat, double rate) async =>
+  Future<int> play(int poolId, int soundId, int repeat, double rate, int offset) async =>
       (await _channel.invokeMethod("play", {
         "poolId": poolId,
         "soundId": soundId,
         "repeat": repeat,
-        "rate": rate
+        "rate": rate,
+        "offset": offset
       }))!;
 
   @override
@@ -53,11 +54,11 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
       });
 
   @override
-  Future<void> resume(int poolId, int streamId) =>
-      _channel.invokeMethod("resume", {
+  Future<bool> resume(int poolId, int streamId) async =>
+      (await _channel.invokeMethod("resume", {
         "poolId": poolId,
         "streamId": streamId,
-      });
+      })) ?? false;
 
   @override
   Future<void> setVolume(int poolId, int? soundId, int? streamId,
