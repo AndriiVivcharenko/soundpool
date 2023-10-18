@@ -77,9 +77,11 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   }
 
   @override
-  Future<int> play(int poolId, int soundId, int repeat, double rate, int offset) async {
+  Future<int> play(
+      int poolId, int soundId, int repeat, double rate, double offset) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
-    return await wrapper.play(soundId, rate: rate, repeat: repeat, offset: offset);
+    return await wrapper.play(soundId,
+        rate: rate, repeat: repeat, offset: offset);
   }
 
   @override
@@ -115,7 +117,7 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   @override
   Future<void> pause(int poolId, int streamId) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
-    wrapper.pause();
+    wrapper.pause(streamId);
   }
 }
 
@@ -146,7 +148,9 @@ class _AudioContextWrapper {
     return await load(buffer.buffer);
   }
 
-  Future<int> play(int soundId, {double rate = 1.0, int repeat = 0, int offset = 0}) async {
+  Future<int> play(int soundId,
+      {double rate = 1.0, int repeat = 0, double offset = 0, int? customStreamId}) async {
+    print("play audio soundId: ${soundId} offset: ${offset}");
     _CachedAudioSettings cachedAudio = _cache[soundId]!;
     audio.AudioBuffer audioBuffer = cachedAudio.buffer;
     var playbackRate = rate;
@@ -164,18 +168,38 @@ class _AudioContextWrapper {
     if (destination != null) {
       gainNode.connectNode(destination);
     }
-    _lastPlayedStreamId = _lastPlayedStreamId + 1;
-    var streamId = _lastPlayedStreamId;
+    var streamId = 0;
+    if(customStreamId == null) {
+      streamId = _lastPlayedStreamId++ + 1;
+    } else {
+      streamId = customStreamId;
+    }
     var subscription = sampleSource.onEnded.listen((_) {
       var audioWrapper = _playedAudioCache.remove(streamId);
       audioWrapper?.subscription?.cancel();
     });
+
+    if(_playedAudioCache.containsKey(streamId)) {
+      print("stream already exists. stopping it");
+      await stop(streamId);
+    }
+
+    final timer = Timer.periodic(Duration(milliseconds: 10), (timestamp) {
+      if (!_playedAudioCache.containsKey(streamId)) {
+        return;
+      }
+      final wrapper = _playedAudioCache[streamId];
+      if (wrapper != null) {
+        wrapper.pausedAt += 0.01;
+      }
+    });
     _playedAudioCache[streamId] = _PlayingAudioWrapper(
-      sourceNode: sampleSource,
-      gainNode: gainNode,
-      subscription: subscription,
-      soundId: soundId,
-    );
+        sourceNode: sampleSource,
+        gainNode: gainNode,
+        subscription: subscription,
+        soundId: soundId,
+        timer: timer,
+        pausedAt: offset);
     // repeat setup: loop sound when repeat is a non-zero value, -1 means infinite loop, positive number means number of extra repeats
     sampleSource.loop = repeat != 0;
 
@@ -192,20 +216,31 @@ class _AudioContextWrapper {
   //
   // }
 
-
-  Future<void> pause() async {
-    if(audioContext.state == "running") {
-      await audioContext.suspend();
-    }
+  Future<void> pause(int streamId) async {
+    print("pause player: ${streamId}");
+    final wrapper = _playedAudioCache[streamId];
+    wrapper?.subscription?.cancel();
+    wrapper?.sourceNode.stop();
+    wrapper?.timer.cancel();
   }
 
   Future<bool> resume(int streamId) async {
-    print("player: ${audioContext.state}");
-    if(audioContext.state == "suspended") {
+    print("resume player: ${audioContext.state}, ${streamId}");
+    if (audioContext.state == "suspended") {
       await audioContext.resume();
       return true;
     } else {
-      play(streamId);
+      if (_playedAudioCache.containsKey(streamId)) {
+        final wrapper = _playedAudioCache[streamId];
+        await stop(streamId);
+        if (wrapper != null) {
+          await play(wrapper.soundId, offset: wrapper.pausedAt, customStreamId: streamId);
+        } else {
+          print("null wrapper");
+        }
+      } else {
+        print("no stream found");
+      }
     }
 
     return false;
@@ -272,9 +307,14 @@ class _PlayingAudioWrapper {
   final StreamSubscription? subscription;
   final int soundId;
 
-  const _PlayingAudioWrapper(
+  double pausedAt;
+  final Timer timer;
+
+  _PlayingAudioWrapper(
       {required this.sourceNode,
       required this.gainNode,
       this.subscription,
-      required this.soundId});
+      required this.soundId,
+      this.pausedAt = 0,
+      required this.timer});
 }

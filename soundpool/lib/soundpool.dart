@@ -186,7 +186,7 @@ class Soundpool {
   ///
   /// ## web
   /// [repeat] is ignored. The sound is played only once.
-  Future<int> play(int soundId, {int repeat = 0, double rate = 1.0, int offset = 0}) async {
+  Future<int> play(int soundId, {int repeat = 0, double rate = 1.0, double offset = 0}) async {
     assert(!_disposed, "Soundpool instance was already disposed");
     assert(
       rate >= 0.5 && rate <= 2.0,

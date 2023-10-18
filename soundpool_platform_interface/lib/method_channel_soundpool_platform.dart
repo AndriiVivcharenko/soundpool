@@ -31,7 +31,7 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
           {"poolId": poolId, "rawSound": rawSound, "priority": priority}))!;
 
   @override
-  Future<int> play(int poolId, int soundId, int repeat, double rate, int offset) async =>
+  Future<int> play(int poolId, int soundId, int repeat, double rate, double offset) async =>
       (await _channel.invokeMethod("play", {
         "poolId": poolId,
         "soundId": soundId,
