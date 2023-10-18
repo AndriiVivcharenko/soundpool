@@ -59,8 +59,14 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   @override
   Future<double> getPosition(int poolId, int streamId) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
-    final audioCache = wrapper._playedAudioCache[streamId]!;
-    return audioCache.pausedAt;
+    final audioCache = wrapper._playedAudioCache[streamId];
+    return audioCache?.pausedAt ?? 0;
+  }
+
+  Future<bool> checkAvailability(int poolId, int streamId) async {
+    _AudioContextWrapper wrapper = _pool[poolId]!;
+    final audioCache = wrapper._playedAudioCache[streamId];
+    return audioCache != null;
   }
 
   @override
@@ -197,7 +203,7 @@ class _AudioContextWrapper {
       }
       final wrapper = _playedAudioCache[streamId];
       if (wrapper != null) {
-        wrapper.pausedAt += 0.01;
+        wrapper.pausedAt += 0.01 * playbackRate;
       }
     });
     _playedAudioCache[streamId] = _PlayingAudioWrapper(
@@ -233,21 +239,16 @@ class _AudioContextWrapper {
 
   Future<bool> resume(int streamId) async {
     print("resume player: ${audioContext.state}, ${streamId}");
-    if (audioContext.state == "suspended") {
-      await audioContext.resume();
-      return true;
-    } else {
-      if (_playedAudioCache.containsKey(streamId)) {
-        final wrapper = _playedAudioCache[streamId];
-        await stop(streamId);
-        if (wrapper != null) {
-          await play(wrapper.soundId, offset: wrapper.pausedAt, customStreamId: streamId);
-        } else {
-          print("null wrapper");
-        }
+    if (_playedAudioCache.containsKey(streamId)) {
+      final wrapper = _playedAudioCache[streamId];
+      await stop(streamId);
+      if (wrapper != null) {
+        await play(wrapper.soundId, offset: wrapper.pausedAt, customStreamId: streamId);
       } else {
-        print("no stream found");
+        print("null wrapper");
       }
+    } else {
+      print("no stream found");
     }
 
     return false;

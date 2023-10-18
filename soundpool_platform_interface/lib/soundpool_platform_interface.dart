@@ -74,4 +74,8 @@ abstract class SoundpoolPlatform extends PlatformInterface {
   Future<double> getPosition(int poolId, int streamId) {
     throw UnimplementedError("getPosition() has not been implemented");
   }
+
+  Future<bool> checkAvailability(int poolId, int streamId) {
+    throw UnimplementedError("streamAvailability() has not been implemented");
+  }
 }
