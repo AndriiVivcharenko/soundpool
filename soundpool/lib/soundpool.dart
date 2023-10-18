@@ -312,9 +312,9 @@ class Soundpool {
   ///
   /// The Soundpool instance is not usable anymore
   void dispose() {
-    _soundpoolId.future
-        .then((poolId) => _platformInstance.dispose(poolId), onError: (_) {});
     _disposed = true;
+    unawaited(_soundpoolId.future
+        .then((poolId) => _platformInstance.dispose(poolId), onError: (_) {}));
   }
 
   StreamType get streamType => _streamType;
