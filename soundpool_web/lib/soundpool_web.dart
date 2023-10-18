@@ -69,6 +69,18 @@ class SoundpoolPlugin extends SoundpoolPlatform {
     return audioCache != null;
   }
 
+  Future<void> seek(int poolId, int streamId, double offset) async {
+    print("seek poolid: ${poolId} streamId: ${streamId} offset: ${offset}");
+    _AudioContextWrapper wrapper = _pool[poolId]!;
+    final audioCache = wrapper._playedAudioCache[streamId];
+    print("audio cache: ${audioCache}");
+    if (audioCache == null) {
+      return null;
+    }
+    await wrapper.pause(streamId);
+    await wrapper.resume(streamId, customOffset: offset);
+  }
+
   @override
   Future<int> loadUri(int poolId, String uri, int priority) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
@@ -162,7 +174,10 @@ class _AudioContextWrapper {
   }
 
   Future<int> play(int soundId,
-      {double rate = 1.0, int repeat = 0, double offset = 0, int? customStreamId}) async {
+      {double rate = 1.0,
+      int repeat = 0,
+      double offset = 0,
+      int? customStreamId}) async {
     print("play audio soundId: ${soundId} offset: ${offset}");
     _CachedAudioSettings cachedAudio = _cache[soundId]!;
     audio.AudioBuffer audioBuffer = cachedAudio.buffer;
@@ -182,8 +197,9 @@ class _AudioContextWrapper {
       gainNode.connectNode(destination);
     }
     var streamId = 0;
-    if(customStreamId == null) {
-      streamId = _lastPlayedStreamId++ + 1;
+    if (customStreamId == null) {
+      _lastPlayedStreamId += 1;
+      streamId = _lastPlayedStreamId;
     } else {
       streamId = customStreamId;
     }
@@ -192,7 +208,7 @@ class _AudioContextWrapper {
       audioWrapper?.subscription?.cancel();
     });
 
-    if(_playedAudioCache.containsKey(streamId)) {
+    if (_playedAudioCache.containsKey(streamId)) {
       print("stream already exists. stopping it");
       await stop(streamId);
     }
@@ -212,7 +228,8 @@ class _AudioContextWrapper {
         subscription: subscription,
         soundId: soundId,
         timer: timer,
-        pausedAt: offset);
+        pausedAt: offset,
+        repeat: repeat);
     // repeat setup: loop sound when repeat is a non-zero value, -1 means infinite loop, positive number means number of extra repeats
     sampleSource.loop = repeat != 0;
 
@@ -237,13 +254,14 @@ class _AudioContextWrapper {
     wrapper?.timer.cancel();
   }
 
-  Future<bool> resume(int streamId) async {
+  Future<bool> resume(int streamId, {double? customOffset}) async {
     print("resume player: ${audioContext.state}, ${streamId}");
     if (_playedAudioCache.containsKey(streamId)) {
       final wrapper = _playedAudioCache[streamId];
       await stop(streamId);
       if (wrapper != null) {
-        await play(wrapper.soundId, offset: wrapper.pausedAt, customStreamId: streamId);
+        await play(wrapper.soundId,
+            offset: customOffset ?? wrapper.pausedAt, customStreamId: streamId);
       } else {
         print("null wrapper");
       }
@@ -317,6 +335,7 @@ class _PlayingAudioWrapper {
 
   double pausedAt;
   final Timer timer;
+  int repeat = 0;
 
   _PlayingAudioWrapper(
       {required this.sourceNode,
@@ -324,5 +343,6 @@ class _PlayingAudioWrapper {
       this.subscription,
       required this.soundId,
       this.pausedAt = 0,
-      required this.timer});
+      required this.timer,
+      this.repeat = 0});
 }

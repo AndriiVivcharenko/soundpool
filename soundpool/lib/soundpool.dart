@@ -262,6 +262,14 @@ class Soundpool {
     return await _platformInstance.checkAvailability(poolId, streamId);
   }
 
+  Future<void> seek(int streamId, double offset) async {
+    assert(!_disposed, "Soundpool instance was already disposed");
+    assert(streamId > 0,
+    "Invalid 'streamId' parameter. Only values greater than 0 are valid.");
+    int poolId = await _soundpoolId.future;
+    await _platformInstance.seek(poolId, streamId, offset);
+  }
+
   /// Sets volume for playing sound identified by [soundId] or [streamId]
   ///
   /// At least [volume] or both [volumeLeft] and [volumeRight] have to be passed

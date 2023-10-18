@@ -78,4 +78,8 @@ abstract class SoundpoolPlatform extends PlatformInterface {
   Future<bool> checkAvailability(int poolId, int streamId) {
     throw UnimplementedError("streamAvailability() has not been implemented");
   }
+
+  Future<void> seek(int poolId, int streamId, double offset) {
+    throw UnimplementedError("seek() has not been implemented");
+  }
 }

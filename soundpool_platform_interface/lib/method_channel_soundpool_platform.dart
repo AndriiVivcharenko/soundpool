@@ -23,6 +23,7 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
       (await _channel.invokeMethod(
           "getPosition", {"poolId": poolId, "streamId": streamId})) ??
       0;
+
   @override
   Future<bool> checkAvailability(int poolId, int streamId) async =>
       (await _channel.invokeMethod(
@@ -55,6 +56,11 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
         "poolId": poolId,
         "streamId": streamId,
       });
+
+  @override
+  Future<void> seek(int poolId, int streamId, double offset) =>
+      _channel.invokeMethod(
+          "seek", {"poolId": poolId, "streamId": streamId, "offset": offset});
 
   @override
   Future<void> pause(int poolId, int streamId) =>
