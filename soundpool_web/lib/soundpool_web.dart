@@ -57,6 +57,13 @@ class SoundpoolPlugin extends SoundpoolPlatform {
   }
 
   @override
+  Future<double> getPosition(int poolId, int streamId) async {
+    _AudioContextWrapper wrapper = _pool[poolId]!;
+    final audioCache = wrapper._playedAudioCache[streamId]!;
+    return audioCache.pausedAt;
+  }
+
+  @override
   Future<int> loadUri(int poolId, String uri, int priority) async {
     _AudioContextWrapper wrapper = _pool[poolId]!;
     final sourceId = await wrapper.loadUri(uri);

@@ -186,7 +186,8 @@ class Soundpool {
   ///
   /// ## web
   /// [repeat] is ignored. The sound is played only once.
-  Future<int> play(int soundId, {int repeat = 0, double rate = 1.0, double offset = 0}) async {
+  Future<int> play(int soundId,
+      {int repeat = 0, double rate = 1.0, double offset = 0}) async {
     assert(!_disposed, "Soundpool instance was already disposed");
     assert(
       rate >= 0.5 && rate <= 2.0,
@@ -243,6 +244,14 @@ class Soundpool {
         "Invalid 'streamId' parameter. Only values greater than 0 are valid.");
     int poolId = await _soundpoolId.future;
     return await _platformInstance.resume(poolId, streamId);
+  }
+
+  Future<double> getPosition(int streamId) async {
+    assert(!_disposed, "Soundpool instance was already disposed");
+    assert(streamId > 0,
+        "Invalid 'streamId' parameter. Only values greater than 0 are valid.");
+    int poolId = await _soundpoolId.future;
+    return await _platformInstance.getPosition(poolId, streamId);
   }
 
   /// Sets volume for playing sound identified by [soundId] or [streamId]

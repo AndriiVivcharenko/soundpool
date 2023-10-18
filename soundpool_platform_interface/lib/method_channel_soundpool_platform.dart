@@ -19,6 +19,12 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
           "loadUri", {"poolId": poolId, "uri": uri, "priority": priority}))!;
 
   @override
+  Future<double> getPosition(int poolId, int streamId) async =>
+      (await _channel.invokeMethod(
+          "getPosition", {"poolId": poolId, "streamId": streamId})) ??
+      0;
+
+  @override
   Future<double> getDuration(int sourceId) async =>
       (await _channel.invokeMethod("getDuration", {"sourceId": sourceId})) ?? 0;
 
@@ -29,7 +35,8 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
           {"poolId": poolId, "rawSound": rawSound, "priority": priority}))!;
 
   @override
-  Future<int> play(int poolId, int soundId, int repeat, double rate, double offset) async =>
+  Future<int> play(int poolId, int soundId, int repeat, double rate,
+          double offset) async =>
       (await _channel.invokeMethod("play", {
         "poolId": poolId,
         "soundId": soundId,
@@ -56,7 +63,8 @@ class MethodChannelSoundpoolPlatform extends SoundpoolPlatform {
       (await _channel.invokeMethod("resume", {
         "poolId": poolId,
         "streamId": streamId,
-      })) ?? false;
+      })) ??
+      false;
 
   @override
   Future<void> setVolume(int poolId, int? soundId, int? streamId,
