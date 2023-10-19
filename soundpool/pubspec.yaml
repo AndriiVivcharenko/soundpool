@@ -11,12 +11,26 @@ dependencies:
   flutter:
     sdk: flutter
 
+#  soundpool_platform_interface:
+#    path: ../soundpool_platform_interface
+#
+#  soundpool_macos:
+#    path: ../soundpool_macos
+#  soundpool_web:
+#    path: ../soundpool_web
+
   soundpool_platform_interface:
-    path: ../soundpool_platform_interface
-  
-  soundpool_macos: ^2.3.0
+    git:
+      url: https://github.com/spynai/soundpool
+      path: soundpool_platform_interface
+  soundpool_macos:
+    git:
+      url: https://github.com/spynai/soundpool
+      path: soundpool_macos
   soundpool_web:
-    path: ../soundpool_web
+    git:
+      url: https://github.com/spynai/soundpool
+      path: soundpool_web
 
 flutter:
   plugin:

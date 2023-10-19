@@ -132,10 +132,10 @@ packages:
     dependency: transitive
     description:
       name: plugin_platform_interface
-      sha256: c2c49e16d42fd6983eb55e44b7f197fdf16b4da7aab7f8e1d21da307cad3fb02
+      sha256: da3fdfeccc4d4ff2da8f8c556704c08f912542c5fb3cf2233ed75372384a034d
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.6"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -144,11 +144,12 @@ packages:
   soundpool_platform_interface:
     dependency: "direct main"
     description:
-      name: soundpool_platform_interface
-      sha256: "9787f96b54a12e236cd3715cd2cc4bcd1fc1131e834ea7b295ac849ab4e24eab"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
+      path: soundpool_platform_interface
+      ref: HEAD
+      resolved-ref: "07d313cdccc906d1395b6de3202e58abe05da3bd"
+      url: "https://github.com/spynai/soundpool"
+    source: git
+    version: "2.2.0"
   source_span:
     dependency: transitive
     description:
