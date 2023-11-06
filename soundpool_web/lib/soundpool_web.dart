@@ -35,6 +35,7 @@ class SoundpoolPlugin extends SoundpoolPlatform {
     _checkSupported();
     // stream type and streams limit are not supported
     var wrapperIndex = _pool.length + 1;
+    print("create audio context _${wrapperIndex}");
     _pool[wrapperIndex] = _AudioContextWrapper();
     return wrapperIndex;
   }
@@ -147,9 +148,9 @@ class SoundpoolPlugin extends SoundpoolPlatform {
 }
 
 class _AudioContextWrapper {
-  late audio.AudioContext audioContext;
+  late final audio.AudioContext audioContext;
 
-  void _initContext() {
+  _AudioContextWrapper() {
     audioContext = audio.AudioContext();
   }
 
@@ -159,7 +160,6 @@ class _AudioContextWrapper {
   double duration = 0;
 
   Future<int> load(ByteBuffer buffer) async {
-    _initContext();
     audio.AudioBuffer audioBuffer = await audioContext.decodeAudioData(buffer);
     int currentSize = _cache.length;
     _cache[currentSize + 1] = _CachedAudioSettings(buffer: audioBuffer);
@@ -309,6 +309,12 @@ class _AudioContextWrapper {
   }
 
   Future<void> release() async {
+    for(final entry in _playedAudioCache.entries) {
+      await stop(entry.key);
+    }
+    _playedAudioCache.entries.forEach((element) {
+      stop(element.key);
+    });
     _cache.clear();
   }
 
