@@ -309,12 +309,10 @@ class _AudioContextWrapper {
   }
 
   Future<void> release() async {
-    for(final entry in _playedAudioCache.entries) {
-      await stop(entry.key);
-    }
-    _playedAudioCache.entries.forEach((element) {
-      stop(element.key);
-    });
+     await Future.wait(_playedAudioCache.entries.map((e) async {
+      await stop(e.key);
+    }));
+    _playedAudioCache.clear();
     _cache.clear();
   }
 
